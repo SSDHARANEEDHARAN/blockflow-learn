@@ -1,10 +1,12 @@
 import { Link, useLocation } from "react-router-dom";
-import { Code2, Workflow, Home, Blocks } from "lucide-react";
+import { Code2, Workflow, Home, Blocks, Terminal, BookOpen } from "lucide-react";
 
 const navItems = [
   { path: "/", label: "Home", icon: Home },
-  { path: "/blockly", label: "Block Editor", icon: Blocks },
+  { path: "/blockly", label: "Blocks", icon: Blocks },
   { path: "/node-flow", label: "Node Flow", icon: Workflow },
+  { path: "/playground", label: "Playground", icon: Terminal },
+  { path: "/challenges", label: "Lessons", icon: BookOpen },
 ];
 
 const Navbar = () => {

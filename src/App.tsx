@@ -7,6 +7,8 @@ import Navbar from "./components/Navbar";
 import Index from "./pages/Index";
 import BlocklyEditor from "./pages/BlocklyEditor";
 import NodeFlowEditor from "./pages/NodeFlowEditor";
+import CodePlayground from "./pages/CodePlayground";
+import Challenges from "./pages/Challenges";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -22,6 +24,8 @@ const App = () => (
           <Route path="/" element={<Index />} />
           <Route path="/blockly" element={<BlocklyEditor />} />
           <Route path="/node-flow" element={<NodeFlowEditor />} />
+          <Route path="/playground" element={<CodePlayground />} />
+          <Route path="/challenges" element={<Challenges />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>
