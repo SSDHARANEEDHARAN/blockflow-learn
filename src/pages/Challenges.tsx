@@ -12,8 +12,7 @@ const difficultyColor: Record<Challenge["difficulty"], string> = {
   advanced: "text-destructive bg-destructive/10 border-destructive/30",
 };
 
-const editorIcon: Record<Challenge["editor"], typeof Blocks> = {
-  blockly: Blocks,
+const editorIcon: Record<Challenge["editor"], typeof Workflow> = {
   "node-flow": Workflow,
   playground: Terminal,
 };
