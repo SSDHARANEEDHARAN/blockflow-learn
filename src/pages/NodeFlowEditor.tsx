@@ -1,7 +1,6 @@
 import { useCallback, useState } from "react";
 import {
   ReactFlow,
-  MiniMap,
   Controls,
   Background,
   useNodesState,
@@ -188,11 +187,6 @@ const NodeFlowEditor = () => {
             className="bg-background"
           >
             <Controls className="!border-border !bg-card [&_button]:!border-border [&_button]:!bg-card [&_button]:!fill-foreground" />
-            <MiniMap
-              className="!border-border !bg-card"
-              nodeColor={() => "hsl(175 80% 50%)"}
-              maskColor="hsl(220 20% 7% / 0.8)"
-            />
             <Background variant={BackgroundVariant.Dots} gap={20} size={1} color="hsl(220 14% 20%)" />
           </ReactFlow>
         </div>
