@@ -1,6 +1,5 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
-import { motion } from "framer-motion";
 import { BookOpen, Workflow, Terminal, ChevronRight, Star, Lightbulb, CheckCircle2, Trophy } from "lucide-react";
 import { challenges, type Challenge } from "@/data/challenges";
 import { useChallengeProgress } from "@/hooks/use-challenge-progress";
@@ -51,7 +50,7 @@ const Challenges = () => {
   return (
     <div className="min-h-screen pt-16">
       <div className="container py-12">
-        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="mb-10">
+        <div className="mb-10">
           <h1 className="mb-3 text-3xl font-bold">
             <BookOpen className="mr-2 inline h-8 w-8 text-primary" />
             Challenges & <span className="text-primary">Lessons</span>
@@ -60,15 +59,10 @@ const Challenges = () => {
             Step-by-step guided challenges to help you master visual and text-based programming.
             Each challenge includes detailed instructions, hints, and objectives.
           </p>
-        </motion.div>
+        </div>
 
         {/* Progress Overview */}
-        <motion.div
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.1 }}
-          className="mb-8 rounded-xl border border-border bg-card p-5"
-        >
+        <div className="mb-8 rounded-xl border border-border bg-card p-5">
           <div className="mb-3 flex items-center justify-between">
             <div className="flex items-center gap-2">
               <Trophy className="h-5 w-5 text-primary" />
@@ -84,7 +78,7 @@ const Challenges = () => {
               ? "🎉 All challenges completed! You're a master!"
               : `${progressPercent}% complete — keep going!`}
           </p>
-        </motion.div>
+        </div>
 
         {/* Filters */}
         <div className="mb-2 flex gap-2">
@@ -109,16 +103,13 @@ const Challenges = () => {
 
         {/* Challenge grid */}
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-          {filtered.map((challenge, i) => {
+          {filtered.map((challenge) => {
             const Icon = editorIcon[challenge.editor];
             const isExpanded = expandedId === challenge.id;
             const isDone = completed.has(challenge.id);
             return (
-              <motion.div
+              <div
                 key={challenge.id}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: i * 0.05 }}
                 className={`group rounded-xl border transition-all ${
                   isDone
                     ? "border-accent/40 bg-accent/5"
@@ -148,11 +139,7 @@ const Challenges = () => {
                 </div>
 
                 {isExpanded && (
-                  <motion.div
-                    initial={{ height: 0, opacity: 0 }}
-                    animate={{ height: "auto", opacity: 1 }}
-                    className="border-t border-border px-5 pb-5 pt-4"
-                  >
+                  <div className="border-t border-border px-5 pb-5 pt-4">
                     {/* Objective */}
                     <div className="mb-4">
                       <div className="mb-1.5 flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wider text-primary">
@@ -212,9 +199,9 @@ const Challenges = () => {
                         {isDone ? "Completed" : "Mark Complete"}
                       </button>
                     </div>
-                  </motion.div>
+                  </div>
                 )}
-              </motion.div>
+              </div>
             );
           })}
         </div>
