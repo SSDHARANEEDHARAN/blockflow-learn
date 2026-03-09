@@ -1,5 +1,6 @@
 import { Link, useLocation } from "react-router-dom";
-import { Code2, Workflow, Home, Terminal, BookOpen } from "lucide-react";
+import { Code2, Workflow, Home, Terminal, BookOpen, Sun, Moon } from "lucide-react";
+import { useTheme } from "next-themes";
 
 const navItems = [
   { path: "/", label: "Home", icon: Home },
@@ -10,6 +11,7 @@ const navItems = [
 
 const Navbar = () => {
   const location = useLocation();
+  const { theme, setTheme } = useTheme();
 
   return (
     <nav className="fixed top-0 left-0 right-0 z-50 border-b border-border bg-background/80 backdrop-blur-xl">
@@ -41,6 +43,15 @@ const Navbar = () => {
               </Link>
             );
           })}
+
+          <button
+            onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
+            className="ml-2 flex h-9 w-9 items-center justify-center rounded-lg text-muted-foreground transition-all hover:bg-secondary hover:text-foreground"
+            aria-label="Toggle theme"
+          >
+            <Sun className="h-4 w-4 hidden dark:block" />
+            <Moon className="h-4 w-4 block dark:hidden" />
+          </button>
         </div>
       </div>
     </nav>
