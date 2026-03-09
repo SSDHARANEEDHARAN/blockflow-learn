@@ -24,6 +24,8 @@ const App = () => (
           <Route path="/" element={<Index />} />
           <Route path="/blockly" element={<BlocklyEditor />} />
           <Route path="/node-flow" element={<NodeFlowEditor />} />
+          <Route path="/playground" element={<CodePlayground />} />
+          <Route path="/challenges" element={<Challenges />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>
