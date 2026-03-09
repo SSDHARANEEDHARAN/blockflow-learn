@@ -21,6 +21,24 @@ const learningPaths = [
     glowClass: "glow-accent",
     bgClass: "bg-accent/10",
   },
+  {
+    title: "Code Playground",
+    description: "Write and run JavaScript directly with syntax highlighting. Bridge the gap to real coding.",
+    icon: Sparkles,
+    path: "/playground",
+    color: "text-warning",
+    glowClass: "",
+    bgClass: "bg-warning/10",
+  },
+  {
+    title: "Challenges & Lessons",
+    description: "Step-by-step guided lessons and coding challenges for all editors. Learn at your pace.",
+    icon: Trophy,
+    path: "/challenges",
+    color: "text-destructive",
+    glowClass: "",
+    bgClass: "bg-destructive/10",
+  },
 ];
 
 const features = [
