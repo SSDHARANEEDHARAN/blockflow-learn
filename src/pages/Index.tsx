@@ -1,5 +1,4 @@
 import { Link } from "react-router-dom";
-import { motion } from "framer-motion";
 import { Workflow, Sparkles, Zap, BookOpen, Trophy, Terminal } from "lucide-react";
 
 const learningPaths = [
@@ -45,22 +44,15 @@ const Index = () => {
       {/* Hero */}
       <section className="gradient-hero grid-bg relative overflow-hidden px-4 py-24 lg:py-32">
         <div className="container relative z-10">
-          <motion.div
-            initial={{ opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.7 }}
-            className="mx-auto max-w-3xl text-center"
-          >
+          <div className="mx-auto max-w-3xl text-center">
             <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-primary/30 bg-primary/5 px-4 py-1.5 text-sm text-primary">
               <Sparkles className="h-4 w-4" />
               Learn Programming Visually
             </div>
             <h1 className="mb-6 text-4xl font-bold leading-tight tracking-tight sm:text-5xl lg:text-6xl">
-              Code With{" "}
-              <span className="text-primary glow-text-primary">Nodes</span>
+              Code With <span className="text-primary glow-text-primary">Nodes</span>
               <br />
-              Learn by{" "}
-              <span className="text-accent glow-text-accent">Building</span>
+              Learn by <span className="text-accent glow-text-accent">Building</span>
             </h1>
             <p className="mx-auto mb-10 max-w-xl text-lg text-muted-foreground">
               Master programming concepts through node flow editors and a
@@ -82,7 +74,7 @@ const Index = () => {
                 Try Code Playground
               </Link>
             </div>
-          </motion.div>
+          </div>
         </div>
 
         <div className="pointer-events-none absolute inset-0 overflow-hidden">
@@ -98,13 +90,8 @@ const Index = () => {
             Choose Your <span className="text-primary">Path</span>
           </h2>
           <div className="mx-auto grid max-w-4xl gap-6 md:grid-cols-3">
-            {learningPaths.map((path, i) => (
-              <motion.div
-                key={path.title}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.2 + i * 0.15 }}
-              >
+            {learningPaths.map((path) => (
+              <div key={path.title}>
                 <Link
                   to={path.path}
                   className="group block rounded-xl border border-border bg-card p-8 transition-all hover:border-primary/40 hover:shadow-lg hover:shadow-primary/5"
@@ -118,7 +105,7 @@ const Index = () => {
                     Start Learning →
                   </div>
                 </Link>
-              </motion.div>
+              </div>
             ))}
           </div>
         </div>
@@ -128,20 +115,14 @@ const Index = () => {
       <section className="border-t border-border px-4 py-20">
         <div className="container">
           <div className="mx-auto grid max-w-4xl gap-8 sm:grid-cols-2 lg:grid-cols-4">
-            {features.map((f, i) => (
-              <motion.div
-                key={f.title}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.4 + i * 0.1 }}
-                className="text-center"
-              >
+            {features.map((f) => (
+              <div key={f.title} className="text-center">
                 <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-lg bg-secondary">
                   <f.icon className="h-6 w-6 text-primary" />
                 </div>
                 <h4 className="mb-1 font-semibold">{f.title}</h4>
                 <p className="text-sm text-muted-foreground">{f.desc}</p>
-              </motion.div>
+              </div>
             ))}
           </div>
         </div>
