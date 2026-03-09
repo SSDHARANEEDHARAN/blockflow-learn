@@ -42,9 +42,8 @@ const Challenges = () => {
 
   const filteredCompleted = filtered.filter((c) => completed.has(c.id)).length;
 
-  const filters: { value: Filter; label: string; icon: typeof Blocks }[] = [
+  const filters: { value: Filter; label: string; icon: typeof Workflow }[] = [
     { value: "all", label: "All", icon: BookOpen },
-    { value: "blockly", label: "Blocks", icon: Blocks },
     { value: "node-flow", label: "Node Flow", icon: Workflow },
     { value: "playground", label: "Code", icon: Terminal },
   ];
