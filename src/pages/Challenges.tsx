@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
-import { BookOpen, Blocks, Workflow, Terminal, ChevronRight, Star, Lightbulb, CheckCircle2, Trophy } from "lucide-react";
+import { BookOpen, Workflow, Terminal, ChevronRight, Star, Lightbulb, CheckCircle2, Trophy } from "lucide-react";
 import { challenges, type Challenge } from "@/data/challenges";
 import { useChallengeProgress } from "@/hooks/use-challenge-progress";
 import { Progress } from "@/components/ui/progress";
@@ -12,20 +12,17 @@ const difficultyColor: Record<Challenge["difficulty"], string> = {
   advanced: "text-destructive bg-destructive/10 border-destructive/30",
 };
 
-const editorIcon: Record<Challenge["editor"], typeof Blocks> = {
-  blockly: Blocks,
+const editorIcon: Record<Challenge["editor"], typeof Workflow> = {
   "node-flow": Workflow,
   playground: Terminal,
 };
 
 const editorLabel: Record<Challenge["editor"], string> = {
-  blockly: "Block Editor",
   "node-flow": "Node Flow",
   playground: "Code Playground",
 };
 
 const editorPath: Record<Challenge["editor"], string> = {
-  blockly: "/blockly",
   "node-flow": "/node-flow",
   playground: "/playground",
 };
@@ -45,9 +42,8 @@ const Challenges = () => {
 
   const filteredCompleted = filtered.filter((c) => completed.has(c.id)).length;
 
-  const filters: { value: Filter; label: string; icon: typeof Blocks }[] = [
+  const filters: { value: Filter; label: string; icon: typeof Workflow }[] = [
     { value: "all", label: "All", icon: BookOpen },
-    { value: "blockly", label: "Blocks", icon: Blocks },
     { value: "node-flow", label: "Node Flow", icon: Workflow },
     { value: "playground", label: "Code", icon: Terminal },
   ];
