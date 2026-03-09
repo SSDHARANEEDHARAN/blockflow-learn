@@ -1,8 +1,10 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
-import { BookOpen, Blocks, Workflow, Terminal, ChevronRight, Star, Lightbulb } from "lucide-react";
+import { BookOpen, Blocks, Workflow, Terminal, ChevronRight, Star, Lightbulb, CheckCircle2, Trophy } from "lucide-react";
 import { challenges, type Challenge } from "@/data/challenges";
+import { useChallengeProgress } from "@/hooks/use-challenge-progress";
+import { Progress } from "@/components/ui/progress";
 
 const difficultyColor: Record<Challenge["difficulty"], string> = {
   beginner: "text-accent bg-accent/10 border-accent/30",
@@ -33,8 +35,15 @@ type Filter = "all" | Challenge["editor"];
 const Challenges = () => {
   const [filter, setFilter] = useState<Filter>("all");
   const [expandedId, setExpandedId] = useState<string | null>(null);
+  const { completed, toggle } = useChallengeProgress();
 
   const filtered = filter === "all" ? challenges : challenges.filter((c) => c.editor === filter);
+
+  const totalCount = challenges.length;
+  const completedCount = completed.size;
+  const progressPercent = totalCount > 0 ? Math.round((completedCount / totalCount) * 100) : 0;
+
+  const filteredCompleted = filtered.filter((c) => completed.has(c.id)).length;
 
   const filters: { value: Filter; label: string; icon: typeof Blocks }[] = [
     { value: "all", label: "All", icon: BookOpen },
@@ -57,8 +66,32 @@ const Challenges = () => {
           </p>
         </motion.div>
 
+        {/* Progress Overview */}
+        <motion.div
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.1 }}
+          className="mb-8 rounded-xl border border-border bg-card p-5"
+        >
+          <div className="mb-3 flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <Trophy className="h-5 w-5 text-primary" />
+              <span className="font-semibold">Your Progress</span>
+            </div>
+            <span className="text-sm font-bold text-primary">
+              {completedCount}/{totalCount} completed
+            </span>
+          </div>
+          <Progress value={progressPercent} className="h-2.5" />
+          <p className="mt-2 text-xs text-muted-foreground">
+            {progressPercent === 100
+              ? "🎉 All challenges completed! You're a master!"
+              : `${progressPercent}% complete — keep going!`}
+          </p>
+        </motion.div>
+
         {/* Filters */}
-        <div className="mb-8 flex gap-2">
+        <div className="mb-2 flex gap-2">
           {filters.map((f) => (
             <button
               key={f.value}
@@ -74,19 +107,27 @@ const Challenges = () => {
             </button>
           ))}
         </div>
+        <p className="mb-6 text-xs text-muted-foreground">
+          Showing {filtered.length} challenges · {filteredCompleted} completed
+        </p>
 
         {/* Challenge grid */}
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
           {filtered.map((challenge, i) => {
             const Icon = editorIcon[challenge.editor];
             const isExpanded = expandedId === challenge.id;
+            const isDone = completed.has(challenge.id);
             return (
               <motion.div
                 key={challenge.id}
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: i * 0.05 }}
-                className="group rounded-xl border border-border bg-card transition-all hover:border-primary/30"
+                className={`group rounded-xl border transition-all ${
+                  isDone
+                    ? "border-accent/40 bg-accent/5"
+                    : "border-border bg-card hover:border-primary/30"
+                }`}
               >
                 <div
                   className="cursor-pointer p-5"
@@ -97,11 +138,16 @@ const Challenges = () => {
                       <Icon className="h-4 w-4 text-muted-foreground" />
                       <span className="text-xs text-muted-foreground">{editorLabel[challenge.editor]}</span>
                     </div>
-                    <span className={`rounded-full border px-2 py-0.5 text-[10px] font-semibold uppercase ${difficultyColor[challenge.difficulty]}`}>
-                      {challenge.difficulty}
-                    </span>
+                    <div className="flex items-center gap-2">
+                      {isDone && <CheckCircle2 className="h-4 w-4 text-accent" />}
+                      <span className={`rounded-full border px-2 py-0.5 text-[10px] font-semibold uppercase ${difficultyColor[challenge.difficulty]}`}>
+                        {challenge.difficulty}
+                      </span>
+                    </div>
                   </div>
-                  <h3 className="mb-1.5 text-lg font-bold">{challenge.title}</h3>
+                  <h3 className={`mb-1.5 text-lg font-bold ${isDone ? "line-through opacity-70" : ""}`}>
+                    {challenge.title}
+                  </h3>
                   <p className="text-sm text-muted-foreground">{challenge.description}</p>
                 </div>
 
@@ -148,12 +194,28 @@ const Challenges = () => {
                       ))}
                     </div>
 
-                    <Link
-                      to={editorPath[challenge.editor]}
-                      className="inline-flex items-center gap-1.5 rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground transition-all hover:scale-105 glow-primary"
-                    >
-                      Open Editor <ChevronRight className="h-4 w-4" />
-                    </Link>
+                    <div className="flex items-center gap-3">
+                      <Link
+                        to={editorPath[challenge.editor]}
+                        className="inline-flex items-center gap-1.5 rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground transition-all hover:scale-105 glow-primary"
+                      >
+                        Open Editor <ChevronRight className="h-4 w-4" />
+                      </Link>
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          toggle(challenge.id);
+                        }}
+                        className={`inline-flex items-center gap-1.5 rounded-lg border px-4 py-2 text-sm font-semibold transition-all ${
+                          isDone
+                            ? "border-accent/30 bg-accent/10 text-accent hover:bg-accent/20"
+                            : "border-border bg-secondary text-secondary-foreground hover:bg-secondary/80"
+                        }`}
+                      >
+                        <CheckCircle2 className="h-4 w-4" />
+                        {isDone ? "Completed" : "Mark Complete"}
+                      </button>
+                    </div>
                   </motion.div>
                 )}
               </motion.div>
