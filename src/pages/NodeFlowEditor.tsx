@@ -16,32 +16,62 @@ import {
 import "@xyflow/react/dist/style.css";
 import { Play, RotateCcw, Workflow, Plus } from "lucide-react";
 
-// Custom node components
-const InputNode = ({ data }: { data: { label: string; value: string } }) => (
-  <div className="rounded-lg border border-primary/40 bg-card px-4 py-3 shadow-lg shadow-primary/10">
+// Custom editable node components
+const InputNode = ({ id, data }: { id: string; data: { label: string; value: string; onUpdate?: (id: string, field: string, val: string) => void } }) => (
+  <div className="rounded-lg border border-primary/40 bg-card px-4 py-3 shadow-lg shadow-primary/10 min-w-[140px]">
     <div className="mb-1 text-[10px] font-semibold uppercase tracking-wider text-primary">Input</div>
-    <div className="font-mono text-sm text-foreground">{data.label}</div>
-    <div className="mt-1 text-xs text-muted-foreground">Value: {data.value}</div>
+    <input
+      type="text"
+      value={data.label}
+      onChange={(e) => data.onUpdate?.(id, "label", e.target.value)}
+      className="mb-1 block w-full bg-transparent font-mono text-sm text-foreground outline-none border-b border-transparent focus:border-primary/40"
+      placeholder="Label"
+    />
+    <input
+      type="number"
+      value={data.value}
+      onChange={(e) => data.onUpdate?.(id, "value", e.target.value)}
+      className="block w-full bg-secondary/50 rounded px-1.5 py-0.5 font-mono text-xs text-foreground outline-none focus:ring-1 focus:ring-primary/40"
+      placeholder="Value"
+    />
     <Handle type="source" position={Position.Right} className="!h-3 !w-3 !border-2 !border-primary !bg-background" />
   </div>
 );
 
-const ProcessNode = ({ data }: { data: { label: string; operation: string } }) => (
-  <div className="rounded-lg border border-warning/40 bg-card px-4 py-3 shadow-lg shadow-warning/10">
+const ProcessNode = ({ id, data }: { id: string; data: { label: string; operation: string; onUpdate?: (id: string, field: string, val: string) => void } }) => (
+  <div className="rounded-lg border border-warning/40 bg-card px-4 py-3 shadow-lg shadow-warning/10 min-w-[140px]">
     <Handle type="target" position={Position.Left} className="!h-3 !w-3 !border-2 !border-warning !bg-background" />
     <div className="mb-1 text-[10px] font-semibold uppercase tracking-wider text-warning">Process</div>
-    <div className="font-mono text-sm text-foreground">{data.label}</div>
-    <div className="mt-1 text-xs text-muted-foreground">{data.operation}</div>
+    <input
+      type="text"
+      value={data.label}
+      onChange={(e) => data.onUpdate?.(id, "label", e.target.value)}
+      className="mb-1 block w-full bg-transparent font-mono text-sm text-foreground outline-none border-b border-transparent focus:border-warning/40"
+      placeholder="Label"
+    />
+    <input
+      type="text"
+      value={data.operation}
+      onChange={(e) => data.onUpdate?.(id, "operation", e.target.value)}
+      className="block w-full bg-secondary/50 rounded px-1.5 py-0.5 font-mono text-xs text-muted-foreground outline-none focus:ring-1 focus:ring-warning/40"
+      placeholder="Operation"
+    />
     <Handle type="source" position={Position.Right} className="!h-3 !w-3 !border-2 !border-warning !bg-background" />
   </div>
 );
 
-const OutputNode = ({ data }: { data: { label: string; result: string } }) => (
-  <div className="rounded-lg border border-accent/40 bg-card px-4 py-3 shadow-lg shadow-accent/10">
+const OutputNode = ({ id, data }: { id: string; data: { label: string; result: string; onUpdate?: (id: string, field: string, val: string) => void } }) => (
+  <div className="rounded-lg border border-accent/40 bg-card px-4 py-3 shadow-lg shadow-accent/10 min-w-[140px]">
     <Handle type="target" position={Position.Left} className="!h-3 !w-3 !border-2 !border-accent !bg-background" />
     <div className="mb-1 text-[10px] font-semibold uppercase tracking-wider text-accent">Output</div>
-    <div className="font-mono text-sm text-foreground">{data.label}</div>
-    <div className="mt-1 text-xs text-accent">{data.result}</div>
+    <input
+      type="text"
+      value={data.label}
+      onChange={(e) => data.onUpdate?.(id, "label", e.target.value)}
+      className="mb-1 block w-full bg-transparent font-mono text-sm text-foreground outline-none border-b border-transparent focus:border-accent/40"
+      placeholder="Label"
+    />
+    <div className="mt-1 rounded bg-accent/10 px-1.5 py-0.5 text-center font-mono text-xs font-bold text-accent">{data.result}</div>
   </div>
 );
 
@@ -51,11 +81,11 @@ const nodeTypes = {
   outputNode: OutputNode,
 };
 
-const initialNodes: Node[] = [
-  { id: "1", type: "inputNode", position: { x: 50, y: 50 }, data: { label: "Number A", value: "10" } },
-  { id: "2", type: "inputNode", position: { x: 50, y: 200 }, data: { label: "Number B", value: "5" } },
-  { id: "3", type: "processNode", position: { x: 350, y: 100 }, data: { label: "Add", operation: "A + B" } },
-  { id: "4", type: "outputNode", position: { x: 650, y: 100 }, data: { label: "Result", result: "—" } },
+const makeInitialNodes = (onUpdate: (id: string, field: string, val: string) => void): Node[] => [
+  { id: "1", type: "inputNode", position: { x: 50, y: 50 }, data: { label: "Number A", value: "10", onUpdate } },
+  { id: "2", type: "inputNode", position: { x: 50, y: 200 }, data: { label: "Number B", value: "5", onUpdate } },
+  { id: "3", type: "processNode", position: { x: 350, y: 100 }, data: { label: "Add", operation: "A + B", onUpdate } },
+  { id: "4", type: "outputNode", position: { x: 650, y: 100 }, data: { label: "Result", result: "—", onUpdate } },
 ];
 
 const initialEdges: Edge[] = [
@@ -71,7 +101,15 @@ const nodeTemplates = [
 ];
 
 const NodeFlowEditor = () => {
-  const [nodes, setNodes, onNodesChange] = useNodesState(initialNodes);
+  const updateNodeData = useCallback((id: string, field: string, val: string) => {
+    setNodes((nds) =>
+      nds.map((node) =>
+        node.id === id ? { ...node, data: { ...node.data, [field]: val } } : node
+      )
+    );
+  }, []);
+
+  const [nodes, setNodes, onNodesChange] = useNodesState(makeInitialNodes(updateNodeData));
   const [edges, setEdges, onEdgesChange] = useEdgesState(initialEdges);
   const [executionLog, setExecutionLog] = useState<string[]>([]);
 
@@ -83,7 +121,6 @@ const NodeFlowEditor = () => {
 
   const runFlow = () => {
     const logs: string[] = [];
-    // Simple simulation
     const inputNodes = nodes.filter((n) => n.type === "inputNode");
     const processNodes = nodes.filter((n) => n.type === "processNode");
     const outputNodes = nodes.filter((n) => n.type === "outputNode");
@@ -100,7 +137,6 @@ const NodeFlowEditor = () => {
       const result = inputValues.reduce((a, b) => a + b, 0);
       logs.push(`⚙️ Process "${n.data.label}": ${inputValues.join(" + ")} = ${result}`);
 
-      // Update connected output nodes
       const outEdges = edges.filter((e) => e.source === n.id);
       outEdges.forEach((e) => {
         setNodes((nds) =>
@@ -111,13 +147,13 @@ const NodeFlowEditor = () => {
       });
     });
 
-    outputNodes.forEach((n) => logs.push(`📤 Output "${n.data.label}"`));
+    outputNodes.forEach((n) => logs.push(`📤 Output "${n.data.label}": ${n.data.result}`));
     logs.push("✅ Flow executed successfully!");
     setExecutionLog(logs);
   };
 
   const resetFlow = () => {
-    setNodes(initialNodes);
+    setNodes(makeInitialNodes(updateNodeData));
     setEdges(initialEdges);
     setExecutionLog([]);
   };
@@ -128,7 +164,7 @@ const NodeFlowEditor = () => {
       id,
       type: template.type,
       position: { x: 200 + Math.random() * 200, y: 100 + Math.random() * 200 },
-      data: { ...template.data },
+      data: { ...template.data, onUpdate: updateNodeData },
     };
     setNodes((nds) => [...nds, newNode]);
   };
