@@ -1,17 +1,8 @@
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
-import { Blocks, Workflow, Sparkles, Zap, BookOpen, Trophy } from "lucide-react";
+import { Workflow, Sparkles, Zap, BookOpen, Trophy, Terminal } from "lucide-react";
 
 const learningPaths = [
-  {
-    title: "Block Programming",
-    description: "Learn coding fundamentals by snapping blocks together. No syntax errors, just pure logic.",
-    icon: Blocks,
-    path: "/blockly",
-    color: "text-primary",
-    glowClass: "glow-primary",
-    bgClass: "bg-primary/10",
-  },
   {
     title: "Node Flow",
     description: "Connect nodes to build data pipelines and understand how programs flow from input to output.",
@@ -24,7 +15,7 @@ const learningPaths = [
   {
     title: "Code Playground",
     description: "Write and run JavaScript directly with syntax highlighting. Bridge the gap to real coding.",
-    icon: Sparkles,
+    icon: Terminal,
     path: "/playground",
     color: "text-warning",
     glowClass: "",
@@ -65,36 +56,35 @@ const Index = () => {
               Learn Programming Visually
             </div>
             <h1 className="mb-6 text-4xl font-bold leading-tight tracking-tight sm:text-5xl lg:text-6xl">
-              Code Without{" "}
-              <span className="text-primary glow-text-primary">Typing</span>
+              Code With{" "}
+              <span className="text-primary glow-text-primary">Nodes</span>
               <br />
               Learn by{" "}
               <span className="text-accent glow-text-accent">Building</span>
             </h1>
             <p className="mx-auto mb-10 max-w-xl text-lg text-muted-foreground">
-              Master programming concepts through visual block-based coding and
-              node flow editors. Perfect for beginners and visual learners.
+              Master programming concepts through node flow editors and a
+              hands-on code playground. Perfect for beginners and visual learners.
             </p>
             <div className="flex flex-wrap items-center justify-center gap-4">
               <Link
-                to="/blockly"
+                to="/node-flow"
                 className="inline-flex items-center gap-2 rounded-lg bg-primary px-6 py-3 font-semibold text-primary-foreground transition-all hover:scale-105 glow-primary"
               >
-                <Blocks className="h-5 w-5" />
-                Start with Blocks
+                <Workflow className="h-5 w-5" />
+                Start with Node Flow
               </Link>
               <Link
-                to="/node-flow"
+                to="/playground"
                 className="inline-flex items-center gap-2 rounded-lg border border-accent/40 bg-accent/10 px-6 py-3 font-semibold text-accent transition-all hover:scale-105 hover:bg-accent/20"
               >
-                <Workflow className="h-5 w-5" />
-                Try Node Flow
+                <Terminal className="h-5 w-5" />
+                Try Code Playground
               </Link>
             </div>
           </motion.div>
         </div>
 
-        {/* Floating decorative elements */}
         <div className="pointer-events-none absolute inset-0 overflow-hidden">
           <div className="absolute -right-20 top-20 h-72 w-72 rounded-full bg-primary/5 blur-3xl" />
           <div className="absolute -left-20 bottom-20 h-72 w-72 rounded-full bg-accent/5 blur-3xl" />
@@ -107,7 +97,7 @@ const Index = () => {
           <h2 className="mb-12 text-center text-3xl font-bold">
             Choose Your <span className="text-primary">Path</span>
           </h2>
-          <div className="mx-auto grid max-w-4xl gap-6 md:grid-cols-2">
+          <div className="mx-auto grid max-w-4xl gap-6 md:grid-cols-3">
             {learningPaths.map((path, i) => (
               <motion.div
                 key={path.title}

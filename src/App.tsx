@@ -21,7 +21,6 @@ const App = () => (
         <Navbar />
         <Routes>
           <Route path="/" element={<Index />} />
-          <Route path="/blockly" element={<BlocklyEditor />} />
           <Route path="/node-flow" element={<NodeFlowEditor />} />
           <Route path="/playground" element={<CodePlayground />} />
           <Route path="/challenges" element={<Challenges />} />
