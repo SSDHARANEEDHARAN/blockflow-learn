@@ -2,7 +2,7 @@ export interface Challenge {
   id: string;
   title: string;
   difficulty: "beginner" | "intermediate" | "advanced";
-  editor: "blockly" | "node-flow" | "playground";
+  editor: "node-flow" | "playground";
   description: string;
   objective: string;
   steps: string[];
