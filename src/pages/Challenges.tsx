@@ -23,7 +23,6 @@ const editorLabel: Record<Challenge["editor"], string> = {
 };
 
 const editorPath: Record<Challenge["editor"], string> = {
-  blockly: "/blockly",
   "node-flow": "/node-flow",
   playground: "/playground",
 };
