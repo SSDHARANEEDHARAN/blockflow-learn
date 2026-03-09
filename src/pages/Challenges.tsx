@@ -18,7 +18,6 @@ const editorIcon: Record<Challenge["editor"], typeof Workflow> = {
 };
 
 const editorLabel: Record<Challenge["editor"], string> = {
-  blockly: "Block Editor",
   "node-flow": "Node Flow",
   playground: "Code Playground",
 };
