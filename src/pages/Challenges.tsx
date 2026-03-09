@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
-import { BookOpen, Blocks, Workflow, Terminal, ChevronRight, Star, Lightbulb, CheckCircle2, Trophy } from "lucide-react";
+import { BookOpen, Workflow, Terminal, ChevronRight, Star, Lightbulb, CheckCircle2, Trophy } from "lucide-react";
 import { challenges, type Challenge } from "@/data/challenges";
 import { useChallengeProgress } from "@/hooks/use-challenge-progress";
 import { Progress } from "@/components/ui/progress";
