@@ -1,4 +1,4 @@
-import { useCallback, useState } from "react";
+import { useCallback, useState, useEffect } from "react";
 import {
   ReactFlow,
   Controls,
@@ -12,68 +12,79 @@ import {
   BackgroundVariant,
   Handle,
   Position,
+  useReactFlow,
+  ReactFlowProvider,
 } from "@xyflow/react";
 import "@xyflow/react/dist/style.css";
-import { Play, RotateCcw, Workflow, Plus } from "lucide-react";
+import { Play, RotateCcw, Workflow, Plus, Trash2, Grid3X3 } from "lucide-react";
 
-// Custom editable node components
-const InputNode = ({ id, data }: { id: string; data: { label: string; value: string; onUpdate?: (id: string, field: string, val: string) => void } }) => (
-  <div className="rounded-lg border border-primary/40 bg-card px-4 py-3 shadow-lg shadow-primary/10 min-w-[140px]">
-    <div className="mb-1 text-[10px] font-semibold uppercase tracking-wider text-primary">Input</div>
-    <input
-      type="text"
-      value={data.label}
-      onChange={(e) => data.onUpdate?.(id, "label", e.target.value)}
-      className="mb-1 block w-full bg-transparent font-mono text-sm text-foreground outline-none border-b border-transparent focus:border-primary/40"
-      placeholder="Label"
-    />
-    <input
-      type="number"
-      value={data.value}
-      onChange={(e) => data.onUpdate?.(id, "value", e.target.value)}
-      className="block w-full bg-secondary/50 rounded px-1.5 py-0.5 font-mono text-xs text-foreground outline-none focus:ring-1 focus:ring-primary/40"
-      placeholder="Value"
-    />
-    <Handle type="source" position={Position.Right} className="!h-3 !w-3 !border-2 !border-primary !bg-background" />
-  </div>
-);
+type Operation = "add" | "subtract" | "multiply";
+const operationLabels: Record<Operation, string> = { add: "Add (+)", subtract: "Subtract (−)", multiply: "Multiply (×)" };
 
-const ProcessNode = ({ id, data }: { id: string; data: { label: string; operation: string; onUpdate?: (id: string, field: string, val: string) => void } }) => (
-  <div className="rounded-lg border border-warning/40 bg-card px-4 py-3 shadow-lg shadow-warning/10 min-w-[140px]">
-    <Handle type="target" position={Position.Left} className="!h-3 !w-3 !border-2 !border-warning !bg-background" />
-    <div className="mb-1 text-[10px] font-semibold uppercase tracking-wider text-warning">Process</div>
-    <input
-      type="text"
-      value={data.label}
-      onChange={(e) => data.onUpdate?.(id, "label", e.target.value)}
-      className="mb-1 block w-full bg-transparent font-mono text-sm text-foreground outline-none border-b border-transparent focus:border-warning/40"
-      placeholder="Label"
-    />
-    <input
-      type="text"
-      value={data.operation}
-      onChange={(e) => data.onUpdate?.(id, "operation", e.target.value)}
-      className="block w-full bg-secondary/50 rounded px-1.5 py-0.5 font-mono text-xs text-muted-foreground outline-none focus:ring-1 focus:ring-warning/40"
-      placeholder="Operation"
-    />
-    <Handle type="source" position={Position.Right} className="!h-3 !w-3 !border-2 !border-warning !bg-background" />
-  </div>
-);
+const InputNode = ({ id, data }: { id: string; data: Record<string, unknown> }) => {
+  const d = data as { label: string; value: string; onUpdate?: (id: string, field: string, val: string) => void };
+  return (
+    <div className="rounded-lg border border-primary/40 bg-card px-4 py-3 shadow-lg shadow-primary/10 min-w-[140px]">
+      <div className="mb-1 text-[10px] font-semibold uppercase tracking-wider text-primary">Input</div>
+      <input
+        type="text"
+        value={d.label}
+        onChange={(e) => d.onUpdate?.(id, "label", e.target.value)}
+        className="mb-1 block w-full bg-transparent font-mono text-sm text-foreground outline-none border-b border-transparent focus:border-primary/40"
+      />
+      <input
+        type="number"
+        value={d.value}
+        onChange={(e) => d.onUpdate?.(id, "value", e.target.value)}
+        className="block w-full bg-secondary/50 rounded px-1.5 py-0.5 font-mono text-xs text-foreground outline-none focus:ring-1 focus:ring-primary/40"
+      />
+      <Handle type="source" position={Position.Right} className="!h-3 !w-3 !border-2 !border-primary !bg-background" />
+    </div>
+  );
+};
 
-const OutputNode = ({ id, data }: { id: string; data: { label: string; result: string; onUpdate?: (id: string, field: string, val: string) => void } }) => (
-  <div className="rounded-lg border border-accent/40 bg-card px-4 py-3 shadow-lg shadow-accent/10 min-w-[140px]">
-    <Handle type="target" position={Position.Left} className="!h-3 !w-3 !border-2 !border-accent !bg-background" />
-    <div className="mb-1 text-[10px] font-semibold uppercase tracking-wider text-accent">Output</div>
-    <input
-      type="text"
-      value={data.label}
-      onChange={(e) => data.onUpdate?.(id, "label", e.target.value)}
-      className="mb-1 block w-full bg-transparent font-mono text-sm text-foreground outline-none border-b border-transparent focus:border-accent/40"
-      placeholder="Label"
-    />
-    <div className="mt-1 rounded bg-accent/10 px-1.5 py-0.5 text-center font-mono text-xs font-bold text-accent">{data.result}</div>
-  </div>
-);
+const ProcessNode = ({ id, data }: { id: string; data: Record<string, unknown> }) => {
+  const d = data as { label: string; operation: Operation; onUpdate?: (id: string, field: string, val: string) => void };
+  return (
+    <div className="rounded-lg border border-warning/40 bg-card px-4 py-3 shadow-lg shadow-warning/10 min-w-[160px]">
+      <Handle type="target" position={Position.Left} className="!h-3 !w-3 !border-2 !border-warning !bg-background" />
+      <div className="mb-1 text-[10px] font-semibold uppercase tracking-wider text-warning">Process</div>
+      <input
+        type="text"
+        value={d.label}
+        onChange={(e) => d.onUpdate?.(id, "label", e.target.value)}
+        className="mb-1.5 block w-full bg-transparent font-mono text-sm text-foreground outline-none border-b border-transparent focus:border-warning/40"
+      />
+      <select
+        value={d.operation}
+        onChange={(e) => d.onUpdate?.(id, "operation", e.target.value)}
+        className="block w-full bg-secondary/50 rounded px-1.5 py-1 font-mono text-xs text-foreground outline-none focus:ring-1 focus:ring-warning/40 cursor-pointer"
+      >
+        {(Object.keys(operationLabels) as Operation[]).map((op) => (
+          <option key={op} value={op}>{operationLabels[op]}</option>
+        ))}
+      </select>
+      <Handle type="source" position={Position.Right} className="!h-3 !w-3 !border-2 !border-warning !bg-background" />
+    </div>
+  );
+};
+
+const OutputNode = ({ id, data }: { id: string; data: Record<string, unknown> }) => {
+  const d = data as { label: string; result: string; onUpdate?: (id: string, field: string, val: string) => void };
+  return (
+    <div className="rounded-lg border border-accent/40 bg-card px-4 py-3 shadow-lg shadow-accent/10 min-w-[140px]">
+      <Handle type="target" position={Position.Left} className="!h-3 !w-3 !border-2 !border-accent !bg-background" />
+      <div className="mb-1 text-[10px] font-semibold uppercase tracking-wider text-accent">Output</div>
+      <input
+        type="text"
+        value={d.label}
+        onChange={(e) => d.onUpdate?.(id, "label", e.target.value)}
+        className="mb-1 block w-full bg-transparent font-mono text-sm text-foreground outline-none border-b border-transparent focus:border-accent/40"
+      />
+      <div className="mt-1 rounded bg-accent/10 px-1.5 py-0.5 text-center font-mono text-xs font-bold text-accent">{d.result}</div>
+    </div>
+  );
+};
 
 const nodeTypes = {
   inputNode: InputNode,
@@ -84,7 +95,7 @@ const nodeTypes = {
 const makeInitialNodes = (onUpdate: (id: string, field: string, val: string) => void): Node[] => [
   { id: "1", type: "inputNode", position: { x: 50, y: 50 }, data: { label: "Number A", value: "10", onUpdate } },
   { id: "2", type: "inputNode", position: { x: 50, y: 200 }, data: { label: "Number B", value: "5", onUpdate } },
-  { id: "3", type: "processNode", position: { x: 350, y: 100 }, data: { label: "Add", operation: "A + B", onUpdate } },
+  { id: "3", type: "processNode", position: { x: 350, y: 100 }, data: { label: "Add", operation: "add" as Operation, onUpdate } },
   { id: "4", type: "outputNode", position: { x: 650, y: 100 }, data: { label: "Result", result: "—", onUpdate } },
 ];
 
@@ -96,11 +107,25 @@ const initialEdges: Edge[] = [
 
 const nodeTemplates = [
   { type: "inputNode", label: "Input", data: { label: "Value", value: "0" } },
-  { type: "processNode", label: "Process", data: { label: "Transform", operation: "x → y" } },
+  { type: "processNode", label: "Process", data: { label: "Process", operation: "add" as Operation } },
   { type: "outputNode", label: "Output", data: { label: "Result", result: "—" } },
 ];
 
-const NodeFlowEditor = () => {
+const computeOp = (values: number[], op: Operation): number => {
+  if (values.length === 0) return 0;
+  switch (op) {
+    case "add": return values.reduce((a, b) => a + b, 0);
+    case "subtract": return values.reduce((a, b) => a - b);
+    case "multiply": return values.reduce((a, b) => a * b, 1);
+  }
+};
+
+const opSymbol: Record<Operation, string> = { add: "+", subtract: "−", multiply: "×" };
+
+const FlowEditor = () => {
+  const [snapToGrid, setSnapToGrid] = useState(true);
+  const [executionLog, setExecutionLog] = useState<string[]>([]);
+
   const updateNodeData = useCallback((id: string, field: string, val: string) => {
     setNodes((nds) =>
       nds.map((node) =>
@@ -111,13 +136,35 @@ const NodeFlowEditor = () => {
 
   const [nodes, setNodes, onNodesChange] = useNodesState(makeInitialNodes(updateNodeData));
   const [edges, setEdges, onEdgesChange] = useEdgesState(initialEdges);
-  const [executionLog, setExecutionLog] = useState<string[]>([]);
 
   const onConnect = useCallback(
     (params: Connection) =>
       setEdges((eds) => addEdge({ ...params, animated: true, style: { stroke: "hsl(175 80% 50%)" } }, eds)),
     [setEdges]
   );
+
+  // Delete selected nodes/edges on Delete/Backspace key
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Delete" || e.key === "Backspace") {
+        // Don't delete if user is typing in an input
+        const tag = (e.target as HTMLElement).tagName;
+        if (tag === "INPUT" || tag === "TEXTAREA" || tag === "SELECT") return;
+
+        setNodes((nds) => {
+          const selected = nds.filter((n) => n.selected).map((n) => n.id);
+          if (selected.length === 0) return nds;
+          // Also remove edges connected to deleted nodes
+          setEdges((eds) => eds.filter((e) => !selected.includes(e.source) && !selected.includes(e.target)));
+          return nds.filter((n) => !n.selected);
+        });
+
+        setEdges((eds) => eds.filter((e) => !e.selected));
+      }
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [setNodes, setEdges]);
 
   const runFlow = () => {
     const logs: string[] = [];
@@ -128,21 +175,30 @@ const NodeFlowEditor = () => {
     inputNodes.forEach((n) => logs.push(`📥 Input "${n.data.label}": ${n.data.value}`));
 
     processNodes.forEach((n) => {
+      const op = (n.data.operation as Operation) || "add";
       const incomingEdges = edges.filter((e) => e.target === n.id);
       const inputValues = incomingEdges
         .map((e) => nodes.find((node) => node.id === e.source))
         .filter(Boolean)
         .map((node) => Number(node!.data.value) || 0);
 
-      const result = inputValues.reduce((a, b) => a + b, 0);
-      logs.push(`⚙️ Process "${n.data.label}": ${inputValues.join(" + ")} = ${result}`);
+      const result = computeOp(inputValues, op);
+      const sym = opSymbol[op];
+      logs.push(`⚙️ Process "${n.data.label}": ${inputValues.join(` ${sym} `)} = ${result}`);
 
+      // Update connected output nodes & propagate value for chaining
       const outEdges = edges.filter((e) => e.source === n.id);
       outEdges.forEach((e) => {
         setNodes((nds) =>
-          nds.map((node) =>
-            node.id === e.target ? { ...node, data: { ...node.data, result: String(result) } } : node
-          )
+          nds.map((node) => {
+            if (node.id === e.target && node.type === "outputNode") {
+              return { ...node, data: { ...node.data, result: String(result) } };
+            }
+            if (node.id === e.target) {
+              return { ...node, data: { ...node.data, value: String(result) } };
+            }
+            return node;
+          })
         );
       });
     });
@@ -158,6 +214,15 @@ const NodeFlowEditor = () => {
     setExecutionLog([]);
   };
 
+  const deleteSelected = () => {
+    setNodes((nds) => {
+      const selected = nds.filter((n) => n.selected).map((n) => n.id);
+      setEdges((eds) => eds.filter((e) => !selected.includes(e.source) && !selected.includes(e.target)));
+      return nds.filter((n) => !n.selected);
+    });
+    setEdges((eds) => eds.filter((e) => !e.selected));
+  };
+
   const addNode = (template: (typeof nodeTemplates)[0]) => {
     const id = String(Date.now());
     const newNode: Node = {
@@ -168,6 +233,8 @@ const NodeFlowEditor = () => {
     };
     setNodes((nds) => [...nds, newNode]);
   };
+
+  const hasSelection = nodes.some((n) => n.selected) || edges.some((e) => e.selected);
 
   return (
     <div className="flex h-screen flex-col pt-16">
@@ -192,6 +259,27 @@ const NodeFlowEditor = () => {
         </div>
 
         <div className="ml-auto flex items-center gap-2">
+          <button
+            onClick={() => setSnapToGrid((s) => !s)}
+            className={`flex items-center gap-1.5 rounded-md px-3 py-1.5 text-xs font-medium transition-colors ${
+              snapToGrid
+                ? "bg-primary/10 text-primary"
+                : "bg-secondary text-secondary-foreground hover:bg-secondary/80"
+            }`}
+            title="Toggle grid snap"
+          >
+            <Grid3X3 className="h-3.5 w-3.5" />
+            Snap
+          </button>
+          {hasSelection && (
+            <button
+              onClick={deleteSelected}
+              className="flex items-center gap-1.5 rounded-md bg-destructive/10 px-3 py-1.5 text-xs font-medium text-destructive transition-colors hover:bg-destructive/20"
+            >
+              <Trash2 className="h-3.5 w-3.5" />
+              Delete
+            </button>
+          )}
           <button
             onClick={resetFlow}
             className="flex items-center gap-1.5 rounded-md bg-secondary px-3 py-1.5 text-xs font-medium text-secondary-foreground transition-colors hover:bg-secondary/80"
@@ -219,7 +307,10 @@ const NodeFlowEditor = () => {
             onEdgesChange={onEdgesChange}
             onConnect={onConnect}
             nodeTypes={nodeTypes}
+            snapToGrid={snapToGrid}
+            snapGrid={[20, 20]}
             fitView
+            deleteKeyCode={null}
             className="bg-background"
           >
             <Controls className="!border-border !bg-card [&_button]:!border-border [&_button]:!bg-card [&_button]:!fill-foreground" />
@@ -252,5 +343,11 @@ const NodeFlowEditor = () => {
     </div>
   );
 };
+
+const NodeFlowEditor = () => (
+  <ReactFlowProvider>
+    <FlowEditor />
+  </ReactFlowProvider>
+);
 
 export default NodeFlowEditor;
