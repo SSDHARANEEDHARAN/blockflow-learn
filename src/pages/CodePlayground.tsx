@@ -1,4 +1,4 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useRef } from "react";
 import { Play, RotateCcw, Terminal, Copy, Check } from "lucide-react";
 
 const STARTER_CODE = `// Welcome to the Code Playground! 🚀
@@ -21,38 +21,89 @@ for (let i = 1; i <= 5; i++) {
 }
 `;
 
-// Simple syntax highlighting
-const highlightCode = (code: string) => {
-  const lines = code.split("\n");
-  return lines.map((line, i) => {
-    let highlighted = line
-      // Strings
-      .replace(/(["'`])(?:(?=(\\?))\2.)*?\1/g, '<span class="text-accent">$&</span>')
-      // Comments
-      .replace(/(\/\/.*)$/gm, '<span class="text-muted-foreground italic">$1</span>')
-      // Keywords
-      .replace(/\b(const|let|var|function|return|if|else|for|while|do|switch|case|break|continue|new|class|import|export|default|from|of|in|typeof|instanceof)\b/g, '<span class="text-primary font-semibold">$&</span>')
-      // Numbers
-      .replace(/\b(\d+\.?\d*)\b/g, '<span class="text-warning">$&</span>')
-      // Built-in methods
-      .replace(/\b(console|Math|Array|Object|String|Number|JSON|Date|Promise|setTimeout|setInterval)\b/g, '<span class="text-destructive">$&</span>')
-      // Function calls
-      .replace(/\b([a-zA-Z_]\w*)\s*(?=\()/g, '<span class="text-[hsl(280_70%_70%)]">$&</span>');
-    return (
-      <div key={i} className="flex">
-        <span className="mr-4 inline-block w-8 select-none text-right text-muted-foreground/40">
-          {i + 1}
-        </span>
-        <span dangerouslySetInnerHTML={{ __html: highlighted || "&nbsp;" }} />
-      </div>
-    );
-  });
+// Tokenize a line into styled spans
+const tokenizeLine = (line: string) => {
+  const tokens: { text: string; className: string }[] = [];
+  let remaining = line;
+
+  while (remaining.length > 0) {
+    let match: RegExpMatchArray | null = null;
+    let bestMatch: { text: string; className: string; length: number } | null = null;
+
+    // Comments
+    match = remaining.match(/^(\/\/.*)/);
+    if (match) {
+      bestMatch = { text: match[0], className: "text-muted-foreground italic", length: match[0].length };
+    }
+
+    // Strings
+    if (!bestMatch) {
+      match = remaining.match(/^(["'`])(?:(?=(\\?))\2.)*?\1/);
+      if (match) {
+        bestMatch = { text: match[0], className: "text-accent", length: match[0].length };
+      }
+    }
+
+    // Keywords
+    if (!bestMatch) {
+      match = remaining.match(/^(const|let|var|function|return|if|else|for|while|do|switch|case|break|continue|new|class|import|export|default|from|of|in|typeof|instanceof|async|await|try|catch|finally|throw|yield)\b/);
+      if (match) {
+        bestMatch = { text: match[0], className: "text-primary font-semibold", length: match[0].length };
+      }
+    }
+
+    // Built-ins
+    if (!bestMatch) {
+      match = remaining.match(/^(console|Math|Array|Object|String|Number|JSON|Date|Promise|setTimeout|setInterval|window|document|true|false|null|undefined)\b/);
+      if (match) {
+        bestMatch = { text: match[0], className: "text-destructive", length: match[0].length };
+      }
+    }
+
+    // Numbers
+    if (!bestMatch) {
+      match = remaining.match(/^\b(\d+\.?\d*)\b/);
+      if (match) {
+        bestMatch = { text: match[0], className: "text-warning", length: match[0].length };
+      }
+    }
+
+    // Function calls
+    if (!bestMatch) {
+      match = remaining.match(/^([a-zA-Z_]\w*)\s*(?=\()/);
+      if (match) {
+        bestMatch = { text: match[0], className: "text-[hsl(280,70%,70%)]", length: match[0].length };
+      }
+    }
+
+    if (bestMatch) {
+      tokens.push({ text: bestMatch.text, className: bestMatch.className });
+      remaining = remaining.slice(bestMatch.length);
+    } else {
+      // Take one character as plain text
+      const plainMatch = remaining.match(/^[^/"'`a-zA-Z_0-9]+/) || remaining.match(/^./);
+      const plain = plainMatch ? plainMatch[0] : remaining[0];
+      tokens.push({ text: plain, className: "text-foreground" });
+      remaining = remaining.slice(plain.length);
+    }
+  }
+
+  return tokens;
 };
 
 const CodePlayground = () => {
   const [code, setCode] = useState(STARTER_CODE);
   const [output, setOutput] = useState<string[]>([]);
   const [copied, setCopied] = useState(false);
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const highlightRef = useRef<HTMLDivElement>(null);
+
+  const handleScroll = () => {
+    if (textareaRef.current && highlightRef.current) {
+      highlightRef.current.scrollTop = textareaRef.current.scrollTop;
+      highlightRef.current.scrollLeft = textareaRef.current.scrollLeft;
+    }
+  };
 
   const runCode = useCallback(() => {
     const logs: string[] = [];
@@ -92,6 +143,8 @@ const CodePlayground = () => {
     setTimeout(() => setCopied(false), 2000);
   };
 
+  const lines = code.split("\n");
+
   return (
     <div className="flex h-screen flex-col pt-16">
       {/* Toolbar */}
@@ -127,17 +180,35 @@ const CodePlayground = () => {
 
       <div className="flex flex-1 overflow-hidden">
         {/* Editor area */}
-        <div className="relative flex-1 overflow-hidden">
-          {/* Syntax-highlighted overlay */}
-          <div className="pointer-events-none absolute inset-0 overflow-auto p-4 font-mono text-sm leading-6">
-            {highlightCode(code)}
+        <div className="relative flex-1 overflow-hidden bg-background">
+          {/* Line numbers + highlighted code (visual layer) */}
+          <div
+            ref={highlightRef}
+            className="pointer-events-none absolute inset-0 overflow-hidden p-4 font-mono text-sm leading-6"
+            aria-hidden="true"
+          >
+            {lines.map((line, i) => (
+              <div key={i} className="flex">
+                <span className="mr-4 inline-block w-8 shrink-0 select-none text-right text-muted-foreground/40">
+                  {i + 1}
+                </span>
+                <span className="whitespace-pre">
+                  {tokenizeLine(line).map((token, ti) => (
+                    <span key={ti} className={token.className}>{token.text}</span>
+                  ))}
+                  {line.length === 0 && "\u00A0"}
+                </span>
+              </div>
+            ))}
           </div>
           {/* Textarea (invisible text, visible caret) */}
           <textarea
+            ref={textareaRef}
             value={code}
             onChange={(e) => setCode(e.target.value)}
+            onScroll={handleScroll}
             spellCheck={false}
-            className="absolute inset-0 h-full w-full resize-none bg-background p-4 pl-[3.5rem] font-mono text-sm leading-6 text-transparent caret-foreground outline-none"
+            className="absolute inset-0 h-full w-full resize-none bg-transparent p-4 pl-[3.5rem] font-mono text-sm leading-6 text-transparent caret-foreground outline-none selection:bg-primary/20 selection:text-transparent"
           />
         </div>
 
